@@ -26,3 +26,15 @@ module "storage" {
   source = "./modules/storage"
   name = local.name
 }
+
+module "app_server" {
+  source = "./modules/app-server"
+  name = local.name
+  instance_type = local.instance_type
+  subnet_id = module.network.public_subnet_id
+  security_group_id = module.network.web_security_group_id
+  registry_url = module.registry.registry_url
+  ops_bucket = module.storage.ops_bucket.name
+  uploads_bucket = module.storage.uploads_bucket.name
+  ssm_path = "/${local.project}/"
+}
