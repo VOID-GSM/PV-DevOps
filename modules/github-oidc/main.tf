@@ -14,7 +14,7 @@ resource "aws_iam_role" "deploy" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = [for r in var.github_repos : "repo:${r}:ref:refs/heads/main"]
+          "token.actions.githubusercontent.com:sub" = flatten([for r in var.github_repos : [for b in var.deploy_branches : "repo:${r}:ref:refs/heads/${b}"]])
         }
       }
     }]

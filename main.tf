@@ -46,4 +46,5 @@ module "github-oidc" {
   ecr_repository_arns = module.registry.repository_arns
   ops_bucket          = module.storage.ops_bucket.name
   instance_arn        = module.app_server.instance_arn
+  deploy_branches = ["main", "develop"]
 }
