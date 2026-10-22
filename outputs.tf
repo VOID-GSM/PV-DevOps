@@ -21,3 +21,19 @@ output "deploy_role_arn" {
 output "deploy_document_name" {
   value = module.iam.deploy_document_name
 }
+
+output "web_url" {
+  value = "https://${module.cloudfront.domain_name}"
+}
+
+output "swagger_url" {
+  value = "https://${module.cloudfront.domain_name}/api/swagger-ui/index.html"
+}
+
+output "web_bucket" {
+  value = module.cloudfront.bucket_name
+}
+
+output "cf_distribution_id" {
+  value = module.cloudfront.distribution_id
+}

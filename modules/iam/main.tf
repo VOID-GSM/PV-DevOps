@@ -44,7 +44,20 @@ resource "aws_iam_role_policy" "deploy" {
         Action   = "ssm:SendCommand"
         Resource = [var.instance_arn, aws_ssm_document.deploy.arn]
       },
-      { Effect = "Allow", Action = "ssm:GetCommandInvocation", Resource = "*" },
+      {
+        Effect = "Allow",
+        Action = "ssm:GetCommandInvocation",
+      Resource = "*" },
+      { # 프론트 정적 파일 업로드
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket", "s3:PutObject", "s3:DeleteObject"]
+        Resource = [var.web_bucket_arn, "${var.web_bucket_arn}/*"]
+      },
+      { # 배포 후 CloudFront 캐시 갱신
+        Effect   = "Allow"
+        Action   = "cloudfront:CreateInvalidation"
+        Resource = var.web_distribution_arn
+      },
     ]
   })
 }

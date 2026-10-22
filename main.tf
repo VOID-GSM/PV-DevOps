@@ -40,13 +40,21 @@ module "ec2" {
 }
 
 module "iam" {
-  source              = "./modules/iam"
-  name                = local.name
-  github_repos        = local.github_repos
-  deploy_branches     = ["main", "develop"]
-  ecr_repository_arns = module.ecr.repository_arns
-  ops_bucket          = module.s3.ops_bucket.name
-  instance_arn        = module.ec2.instance_arn
+  source               = "./modules/iam"
+  name                 = local.name
+  github_repos         = local.github_repos
+  deploy_branches      = ["main", "develop"]
+  ecr_repository_arns  = module.ecr.repository_arns
+  ops_bucket           = module.s3.ops_bucket.name
+  instance_arn         = module.ec2.instance_arn
+  web_bucket_arn       = module.cloudfront.bucket_arn
+  web_distribution_arn = module.cloudfront.distribution_arn
+}
+
+module "cloudfront" {
+  source            = "./modules/cloudfront"
+  name              = local.name
+  api_origin_domain = module.ec2.public_dns
 }
 
 moved {
