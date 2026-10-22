@@ -1,3 +1,4 @@
+data "aws_region" "current" {}
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
@@ -64,10 +65,10 @@ resource "aws_ssm_document" "deploy" {
           timeoutSeconds: "1200"
           runCommand:
             - set -euo pipefail
-            - set -a; . /etc/teamops.env; set +a
+            - export AWS_REGION=${data.aws_region.current.region}
             - "[ -x /usr/local/lib/docker/cli-plugins/docker-buildx ] || { curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.38.1/buildx-v0.38.1.linux-arm64 && chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx; }"
             - mkdir -p /data/backend && cd /data/backend
-            - aws s3 sync "s3://$OPS_BUCKET/deploy/backend/" . --delete --exclude ".env" --only-show-errors
+            - aws s3 sync "s3://${var.ops_bucket}/deploy/backend/" . --delete --exclude ".env" --only-show-errors
             - if [ -f gradlew ]; then chmod +x gradlew; fi
             - docker compose up -d --build --remove-orphans --wait --wait-timeout 300
             - docker image prune -f

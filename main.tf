@@ -5,9 +5,9 @@ locals {
   instance_type = "t4g.small"
 
   github_repos = [
-    "VOID-GSM/PV-DevOps",
-    "VOID-GSM/PV-Server",
-    "VOID-GSM/PV-Web",
+    "VOID-GSM@253180703/PV-Server@1407002025",
+    "VOID-GSM@253180703/PV-DevOps@1409495652",
+    "VOID-GSM@253180703/PV-Web@1407001594",
   ]
 }
 
