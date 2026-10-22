@@ -11,40 +11,65 @@ locals {
   ]
 }
 
-module "network" {
-  source            = "./modules/network"
+module "vpc" {
+  source            = "./modules/vpc"
   name              = local.name
   availability_zone = "${local.region}a"
 }
 
-module "registry" {
-  source       = "./modules/registry"
+module "ecr" {
+  source       = "./modules/ecr"
   repositories = ["${local.project}-backend"]
 }
 
-module "storage" {
-  source = "./modules/storage"
+module "s3" {
+  source = "./modules/s3"
   name   = local.name
 }
 
-module "app_server" {
-  source            = "./modules/app-server"
+module "ec2" {
+  source            = "./modules/ec2"
   name              = local.name
   instance_type     = local.instance_type
-  subnet_id         = module.network.public_subnet_id
-  security_group_id = module.network.web_security_group_id
-  registry_url      = module.registry.registry_url
-  ops_bucket        = module.storage.ops_bucket.name
-  uploads_bucket    = module.storage.uploads_bucket.name
+  subnet_id         = module.vpc.public_subnet_id
+  security_group_id = module.vpc.web_security_group_id
+  registry_url      = module.ecr.registry_url
+  ops_bucket        = module.s3.ops_bucket.name
+  uploads_bucket    = module.s3.uploads_bucket.name
   ssm_path          = "/${local.project}/"
 }
 
-module "github-oidc" {
-  source              = "./modules/github-oidc"
+module "iam" {
+  source              = "./modules/iam"
   name                = local.name
   github_repos        = local.github_repos
-  ecr_repository_arns = module.registry.repository_arns
-  ops_bucket          = module.storage.ops_bucket.name
-  instance_arn        = module.app_server.instance_arn
-  deploy_branches = ["main", "develop"]
+  deploy_branches     = ["main", "develop"]
+  ecr_repository_arns = module.ecr.repository_arns
+  ops_bucket          = module.s3.ops_bucket.name
+  instance_arn        = module.ec2.instance_arn
+}
+
+moved {
+  from = module.network
+  to   = module.vpc
+}
+
+moved {
+  from = module.registry
+  to   = module.ecr
+}
+
+moved {
+  from = module.storage
+  to   = module.s3
+}
+
+moved {
+  from = module.app_server
+  to   = module.ec2
+}
+
+moved {
+  from = module.github-oidc
+  to   = module.iam
 }
