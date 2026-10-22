@@ -48,7 +48,7 @@ resource "aws_iam_role_policy" "deploy" {
   })
 }
 
-# EC2에서 실행될 배포 명령. service와 tag는 허용된 값/형식만 받음
+# EC2에서 실행될 배포 명령: S3에 올라온 백엔드 소스를 받아 서버에서 빌드/재시작
 resource "aws_ssm_document" "deploy" {
   name            = "${var.name}-deploy"
   document_type   = "Command"
@@ -56,24 +56,21 @@ resource "aws_ssm_document" "deploy" {
 
   content = <<-YAML
     schemaVersion: "2.2"
-    description: Sync deploy bundle from S3 and roll out the backend
-    parameters:
-      service:
-        type: String
-        allowedValues: [backend, bundle]
-      tag:
-        type: String
-        default: "-"
-        allowedPattern: "^[A-Za-z0-9._-]{1,128}$"
+    description: Sync backend source from S3 and restart with docker compose
     mainSteps:
       - action: aws:runShellScript
         name: deploy
         inputs:
-          timeoutSeconds: "900"
+          timeoutSeconds: "1200"
           runCommand:
             - set -euo pipefail
             - set -a; . /etc/teamops.env; set +a
-            - aws s3 sync "s3://$OPS_BUCKET/deploy/" /opt/teamops/ --delete --only-show-errors
-            - if [ "{{ service }}" = bundle ]; then bash /opt/teamops/scripts/deploy.sh up; else bash /opt/teamops/scripts/deploy.sh "{{ service }}" "{{ tag }}"; fi
+            - "[ -x /usr/local/lib/docker/cli-plugins/docker-buildx ] || { curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.38.1/buildx-v0.38.1.linux-arm64 && chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx; }"
+            - mkdir -p /data/backend && cd /data/backend
+            - aws s3 sync "s3://$OPS_BUCKET/deploy/backend/" . --delete --exclude ".env" --only-show-errors
+            - if [ -f gradlew ]; then chmod +x gradlew; fi
+            - docker compose up -d --build --remove-orphans --wait --wait-timeout 300
+            - docker image prune -f
+            - docker compose ps
   YAML
 }
