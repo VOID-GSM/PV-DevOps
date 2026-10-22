@@ -3,7 +3,7 @@ variable "name" {
 }
 
 variable "cidr" {
-  type = string
+  type    = string
   default = "10.10.0.0/16"
 }
 
@@ -12,6 +12,6 @@ variable "availability_zone" {
 }
 
 variable "ingress_ports" {
-  type = list(number)
-  default = [ 80, 443 ]
+  type    = list(number)
+  default = [80, 443]
 }

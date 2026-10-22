@@ -3,6 +3,6 @@ variable "name" {
 }
 
 variable "backup_retention_days" {
-  type = number
+  type    = number
   default = 14
 }

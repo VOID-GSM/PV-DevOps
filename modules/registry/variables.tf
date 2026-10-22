@@ -3,11 +3,11 @@ variable "repositories" {
 }
 
 variable "keep_images" {
-  type = number
+  type    = number
   default = 10
 }
 
 variable "force_delete" {
-  type        = bool
-  default     = false
+  type    = bool
+  default = false
 }
