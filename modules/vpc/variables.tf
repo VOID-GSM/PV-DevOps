@@ -10,8 +10,3 @@ variable "cidr" {
 variable "availability_zone" {
   type = string
 }
-
-variable "ingress_ports" {
-  type    = list(number)
-  default = [80, 443]
-}

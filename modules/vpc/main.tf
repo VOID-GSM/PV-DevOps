@@ -42,14 +42,8 @@ resource "aws_security_group" "web" {
   vpc_id      = aws_vpc.this.id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "web" {
-  for_each          = toset([for p in var.ingress_ports : tostring(p)])
-  security_group_id = aws_security_group.web.id
-  description       = "public ${each.value}"
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "tcp"
-  from_port         = each.value
-  to_port           = each.value
+data "aws_ec2_managed_prefix_list" "cloudfront" {
+  name = "com.amazonaws.global.cloudfront.origin-facing"
 }
 
 resource "aws_vpc_security_group_egress_rule" "all" {
@@ -57,4 +51,13 @@ resource "aws_vpc_security_group_egress_rule" "all" {
   description       = "packages, ECR, SSM, S3"
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "http_from_cloudfront" {
+  security_group_id = aws_security_group.web.id
+  description       = "HTTP from CloudFront only"
+  prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront.id
+  ip_protocol       = "tcp"
+  from_port         = 80
+  to_port           = 80
 }
