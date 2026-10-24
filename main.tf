@@ -57,6 +57,11 @@ module "cloudfront" {
   api_origin_domain = module.ec2.public_dns
 }
 
+module "backup" {
+  source = "./modules/backup"
+  name = local.name
+}
+
 moved {
   from = module.network
   to   = module.vpc

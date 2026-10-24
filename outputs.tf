@@ -37,3 +37,11 @@ output "web_bucket" {
 output "cf_distribution_id" {
   value = module.cloudfront.distribution_id
 }
+
+output "backup_vault" {
+  value = module.backup.vault_name
+}
+
+output "backup_role_arn" {
+  value = module.backup.role_arn
+}
