@@ -5,7 +5,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "teamops-tfstate-959589243103"
+    bucket       = "pv-tfstate-959589243103"
     key          = "pv/terraform.tfstate"
     region       = "ap-northeast-2"
     encrypt      = true
