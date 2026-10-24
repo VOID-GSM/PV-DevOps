@@ -19,11 +19,11 @@ resource "aws_iam_role" "backup" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-        Effect    = "Allow"
-        Action    = "sts:AssumeRole"
-        Principal = { Service = "backup.amazonaws.com" }
-  }]
-})
+      Effect    = "Allow"
+      Action    = "sts:AssumeRole"
+      Principal = { Service = "backup.amazonaws.com" }
+    }]
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "backup" {
