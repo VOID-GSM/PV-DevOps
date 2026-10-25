@@ -59,7 +59,14 @@ module "cloudfront" {
 
 module "backup" {
   source = "./modules/backup"
-  name = local.name
+  name   = local.name
+}
+
+module "sns" {
+  source                   = "./modules/sns"
+  name                     = local.name
+  subscriber_function_arn  = module.discord_notifier.function_arn
+  subscriber_function_name = module.discord_notifier.function_name
 }
 
 moved {
