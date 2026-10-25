@@ -49,3 +49,7 @@ output "backup_role_arn" {
 output "alarm_topic_arn" {
   value = module.sns.topic_arn
 }
+
+output "terraform_plan_role_arn" {
+  value = module.iam.terraform_plan_role_arn
+}

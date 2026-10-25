@@ -49,6 +49,8 @@ module "iam" {
   instance_arn         = module.ec2.instance_arn
   web_bucket_arn       = module.cloudfront.bucket_arn
   web_distribution_arn = module.cloudfront.distribution_arn
+  infra_repo           = "VOID-GSM@253180703/PV-DevOps@1409495652"
+  state_bucket         = "pv-tfstate-959589243103"
 }
 
 module "cloudfront" {
@@ -58,8 +60,8 @@ module "cloudfront" {
 }
 
 module "backup" {
-  source = "./modules/backup"
-  name   = local.name
+  source          = "./modules/backup"
+  name            = local.name
   alarm_topic_arn = module.sns.topic_arn
 }
 
