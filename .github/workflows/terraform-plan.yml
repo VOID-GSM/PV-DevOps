@@ -1,0 +1,83 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permission:
+  id-token: write
+  contents: read
+  pull_requests: write
+
+concurrency:
+  group: terraform-plan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  plan:
+    runs_on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ var.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Format check
+        run: terraform fmt -check -recursive
+
+      - name: Configure AWS credentials (OIDC, 읽기 전용)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.TF_PLAN_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: Init & validate
+        run: |
+          terraform init -input=false
+          terraform validate -no-color
+
+      - name: Plan
+        id: plan
+        run: |
+          terraform plan -input=false -no-color -lock-timeout=60s -out=tfplan
+          terraform show -no-color tfplan > plan.txt
+
+      - name: Comment plan on PR 
+        if: always() && steps.plan.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          OUTCOME: ${{ steps.plan.outcome }}
+        run: |
+          marker='<!-- terraform-plan -->'
+          {
+            echo "$marker"
+            echo "### Terraform Plan: \`$OUTCOME\`"
+            if [ -f plan.txt ]; then
+              grep -E '^(Plan:|No changes)' plan.txt || true
+              echo
+              echo '<details><summary>전체 plan 보기</summary>'
+              echo
+              echo '```'
+              tail -c 60000 plan.txt
+              echo '```'
+              echo '</details>'
+            else
+              echo "plan 실패. Actions 로그를 확인하세요."
+            fi
+          } > comment.md
+
+          # 기존 댓글이 있으면 수정, 없으면 새로 작성
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md > /dev/null
+          else
+            gh pr comment "$PR" --body-file comment.md
+          fi
