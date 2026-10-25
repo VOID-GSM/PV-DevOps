@@ -69,6 +69,46 @@ module "sns" {
   subscriber_function_name = module.discord_notifier.function_name
 }
 
+module "discord_notifier" {
+  source      = "./modules/lambda"
+  name        = "${local.name}-discord-notifier"
+  source_file = "${path.root}/functions/discord_notifier.py"
+  environment = {
+    WEBHOOK_PARAM = "/${local.project}/alerts/DISCORD_WEBHOOK_URL"
+  }
+  policy_statements = [{
+    Effect   = "Allow"
+    Action   = "ssm:GetParameter"
+    Resource = "arn:aws:ssm:${local.region}:959589243103:parameter/${local.project}/alerts/DISCORD_WEBHOOK_URL"
+  }]
+}
+
+module "health_check" {
+  source      = "./modules/lambda"
+  name        = "${local.name}-health-check"
+  source_file = "${path.root}/functions/health_check.py"
+  timeout     = 30
+  policy_statements = [{
+    Effect    = "Allow"
+    Action    = "cloudwatch:PutMetricData"
+    Resource  = "*"
+    Condition = { StringEquals = { "cloudwatch:namespace" = "PV/HealthCheck" } }
+  }]
+}
+
+module "cloudwatch" {
+  source                     = "./modules/cloudwatch"
+  name                       = local.name
+  instance_id                = module.ec2.instance_id
+  alarm_topic_arn            = module.sns.topic_arn
+  health_check_function_arn  = module.health_check.function_arn
+  health_check_function_name = module.health_check.function_name
+  health_check_targets = {
+    api = "https://${module.cloudfront.domain_name}/api/swagger-ui/index.html"
+    web = "https://${module.cloudfront.domain_name}/"
+  }
+}
+
 moved {
   from = module.network
   to   = module.vpc
