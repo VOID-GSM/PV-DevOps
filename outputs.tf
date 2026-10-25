@@ -45,3 +45,7 @@ output "backup_vault" {
 output "backup_role_arn" {
   value = module.backup.role_arn
 }
+
+output "alarm_topic_arn" {
+  value = module.sns.topic_arn
+}

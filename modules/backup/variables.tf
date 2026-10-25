@@ -9,3 +9,5 @@ variable "retention_days" {
   type    = number
   default = 7
 }
+
+variable "alarm_topic_arn" { type = string }

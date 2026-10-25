@@ -60,7 +60,10 @@ module "cloudfront" {
 module "backup" {
   source = "./modules/backup"
   name   = local.name
+  alarm_topic_arn = module.sns.topic_arn
 }
+
+# ---------- 알림 ----------
 
 module "sns" {
   source                   = "./modules/sns"
@@ -107,6 +110,12 @@ module "cloudwatch" {
     api = "https://${module.cloudfront.domain_name}/api/swagger-ui/index.html"
     web = "https://${module.cloudfront.domain_name}/"
   }
+}
+
+module "budgets" {
+  source          = "./modules/budgets"
+  name            = local.name
+  alarm_topic_arn = module.sns.topic_arn
 }
 
 moved {
