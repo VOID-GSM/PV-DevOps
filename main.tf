@@ -23,8 +23,9 @@ module "ecr" {
 }
 
 module "s3" {
-  source = "./modules/s3"
-  name   = local.name
+  source               = "./modules/s3"
+  name                 = local.name
+  cors_allowed_origins = ["https://${module.cloudfront.domain_name}"]
 }
 
 module "ec2" {
