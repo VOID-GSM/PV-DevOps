@@ -51,6 +51,7 @@ module "iam" {
   web_distribution_arn = module.cloudfront.distribution_arn
   infra_repo           = "VOID-GSM@253180703/PV-DevOps@1409495652"
   state_bucket         = "pv-tfstate-959589243103"
+  deploy_document_arn  = module.ssm.deploy_document_arn
 }
 
 module "cloudfront" {
@@ -118,4 +119,15 @@ module "budgets" {
   source          = "./modules/budgets"
   name            = local.name
   alarm_topic_arn = module.sns.topic_arn
+}
+
+module "ssm" {
+  source     = "./modules/ssm"
+  name       = local.name
+  ops_bucket = module.s3.ops_bucket.name
+}
+
+moved {
+  from = module.iam.aws_ssm_document.deploy
+  to   = module.ssm.aws_ssm_document.deploy
 }

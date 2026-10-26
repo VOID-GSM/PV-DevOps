@@ -15,3 +15,8 @@ variable "state_bucket" {
   description = "Terraform state가 저장된 S3 버킷 이름"
   type        = string
 }
+
+variable "deploy_document_arn" {
+  description = "배포 역할이 실행할 수 있는 SSM 문서 ARN"
+  type        = string
+}
