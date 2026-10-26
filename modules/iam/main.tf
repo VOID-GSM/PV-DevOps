@@ -62,7 +62,6 @@ resource "aws_iam_role_policy" "deploy" {
   })
 }
 
-# EC2에서 실행될 배포 명령: S3에 올라온 백엔드 소스를 받아 서버에서 빌드/재시작
 resource "aws_ssm_document" "deploy" {
   name            = "${var.name}-deploy"
   document_type   = "Command"
@@ -70,21 +69,47 @@ resource "aws_ssm_document" "deploy" {
 
   content = <<-YAML
     schemaVersion: "2.2"
-    description: Sync backend source from S3 and restart with docker compose
+    description: Pull backend image from ECR and restart with docker compose (rollback on failure)
+    parameters:
+      tag:
+        type: String
+        description: Image tag (git commit SHA)
+        allowedPattern: "^[0-9a-f]{7,40}$"
     mainSteps:
       - action: aws:runShellScript
         name: deploy
         inputs:
-          timeoutSeconds: "1200"
+          timeoutSeconds: "900"
           runCommand:
-            - set -euo pipefail
-            - export AWS_REGION=${data.aws_region.current.region}
-            - "[ -x /usr/local/lib/docker/cli-plugins/docker-buildx ] || { curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.38.1/buildx-v0.38.1.linux-arm64 && chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx; }"
-            - mkdir -p /data/backend && cd /data/backend
-            - aws s3 sync "s3://${var.ops_bucket}/deploy/backend/" . --delete --exclude ".env" --only-show-errors
-            - if [ -f gradlew ]; then chmod +x gradlew; fi
-            - docker compose up -d --build --remove-orphans --wait --wait-timeout 300
-            - docker image prune -f
-            - docker compose ps
+            - |
+              set -euo pipefail
+              export AWS_REGION=${data.aws_region.current.region}
+              REGISTRY=${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.region}.amazonaws.com
+              REPO="$REGISTRY/${var.name}-backend"
+              cd /data/backend
+
+              aws s3 cp "s3://${var.ops_bucket}/deploy/backend/docker-compose.yml" docker-compose.yml --only-show-errors
+              aws ecr get-login-password | docker login -u AWS --password-stdin "$REGISTRY" > /dev/null
+              prev="$(cat .backend_tag 2>/dev/null || true)"
+
+              deploy() {
+                export BACKEND_IMAGE="$REPO:$1"
+                docker pull -q "$BACKEND_IMAGE"
+                docker compose up -d --no-build --remove-orphans --wait --wait-timeout 300
+              }
+
+              if deploy "{{ tag }}"; then
+                echo "{{ tag }}" > .backend_tag
+                docker image prune -af --filter "until=72h" > /dev/null
+                echo "deployed {{ tag }}"
+                exit 0
+              fi
+
+              echo "!!! deploy failed: {{ tag }}" >&2
+              docker compose logs --tail 80 backend || true
+              if [ -n "$prev" ]; then
+                deploy "$prev" && echo "rolled back to $prev" >&2
+              fi
+              exit 1
   YAML
 }
