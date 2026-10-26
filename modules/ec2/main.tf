@@ -44,7 +44,9 @@ resource "aws_instance" "this" {
   }
 
   tags = { Name = var.name }
-  lifecycle { ignore_changes = [ami] }
+  lifecycle {
+    ignore_changes = [ami, user_data]
+  }
 }
 
 resource "aws_volume_attachment" "data" {
