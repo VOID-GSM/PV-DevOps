@@ -18,10 +18,6 @@ output "deploy_role_arn" {
   value = module.iam.deploy_role_arn
 }
 
-output "deploy_document_name" {
-  value = module.iam.deploy_document_name
-}
-
 output "web_url" {
   value = "https://${module.cloudfront.domain_name}"
 }
@@ -52,4 +48,8 @@ output "alarm_topic_arn" {
 
 output "terraform_plan_role_arn" {
   value = module.iam.terraform_plan_role_arn
+}
+
+output "deploy_document_name" {
+  value = module.ssm.deploy_document_name
 }
