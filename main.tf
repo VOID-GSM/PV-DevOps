@@ -119,28 +119,3 @@ module "budgets" {
   name            = local.name
   alarm_topic_arn = module.sns.topic_arn
 }
-
-moved {
-  from = module.network
-  to   = module.vpc
-}
-
-moved {
-  from = module.registry
-  to   = module.ecr
-}
-
-moved {
-  from = module.storage
-  to   = module.s3
-}
-
-moved {
-  from = module.app_server
-  to   = module.ec2
-}
-
-moved {
-  from = module.github-oidc
-  to   = module.iam
-}
