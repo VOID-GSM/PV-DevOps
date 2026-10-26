@@ -18,14 +18,14 @@ env:
 
 jobs:
   plan:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: ${{ var.TERRAFORM_VERSION }}
+          terraform_version: ${{ vars.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: Format check
