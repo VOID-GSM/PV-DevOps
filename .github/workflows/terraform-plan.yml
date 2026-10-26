@@ -4,10 +4,10 @@ on:
   pull_request:
     branches: ["main"]
 
-permission:
+permissions:
   id-token: write
   contents: read
-  pull_requests: write
+  pull-requests: write
 
 concurrency:
   group: terraform-plan-${{ github.event.pull_request.number }}
