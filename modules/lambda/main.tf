@@ -6,6 +6,7 @@ data "archive_file" "this" {
   type        = "zip"
   source_file = var.source_file
   output_path = "${path.root}/.build/${var.name}.zip"
+  output_file_mode = "0666"
 }
 
 resource "aws_iam_role" "this" {
