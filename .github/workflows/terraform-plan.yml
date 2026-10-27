@@ -17,6 +17,34 @@ env:
   TF_IN_AUTOMATION: "true"
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337
+        with:
+          tflint_version: v0.65.0
+
+      - name: tflint
+        env:
+          GITHUB_TOKEN: ${{ github.token }} 
+        run: |
+          tflint --init --config "$PWD/.tflint.hcl"
+          tflint --recursive --config "$PWD/.tflint.hcl" --format compact 
+
+      - name: trivy
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          version: v0.76.1
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
   plan:
     runs-on: ubuntu-latest
     timeout-minutes: 15
