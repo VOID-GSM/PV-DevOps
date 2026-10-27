@@ -6,8 +6,3 @@ variable "keep_images" {
   type    = number
   default = 10
 }
-
-variable "force_delete" {
-  type    = bool
-  default = false
-}
