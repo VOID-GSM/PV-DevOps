@@ -1,3 +1,5 @@
+# WAF 미적용: Web ACL 월 $5+ (인프라 전체 비용의 약 25%). Shield Standard 기본 DDoS 보호로 대체
+#trivy:ignore:AWS-0011
 data "aws_caller_identity" "current" {}
 data "aws_cloudfront_cache_policy" "optimized" { name = "Managed-CachingOptimized" }
 data "aws_cloudfront_cache_policy" "disabled" { name = "Managed-CachingDisabled" }

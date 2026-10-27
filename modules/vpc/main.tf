@@ -1,3 +1,6 @@
+# egress 전체 허용: ECR·S3·SSM·패키지 저장소의 IP가 고정되지 않음.
+# 제한하려면 VPC 엔드포인트(개당 월 $7+) 필요. ingress는 CloudFront prefix list만 허용
+#trivy:ignore:AWS-0104
 resource "aws_vpc" "this" {
   cidr_block           = var.cidr
   enable_dns_support   = true
@@ -10,6 +13,8 @@ resource "aws_internet_gateway" "this" {
   tags   = { Name = var.name }
 }
 
+# 퍼블릭 IP 할당: NAT Gateway(월 $40+) 없이 운영하는 설계. 보안 그룹으로 CloudFront 대역 80번만 허용
+#trivy:ignore:AWS-0164
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.this.id
   cidr_block              = cidrsubnet(var.cidr, 8, 0)
