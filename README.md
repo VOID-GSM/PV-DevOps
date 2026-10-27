@@ -80,3 +80,19 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter \
 | 월 예산 80%(실제) · 100%(예상) | 알림 |
 
 모든 알림은 Discord로 전송됩니다.
+
+## Cost
+월 약 **$22** (세전, 2026-10 예상 청구액 기준)
+
+| 항목 | 월 비용 (USD) |
+| --- | --- |
+| EC2 t4g.small | $15.97 |
+| Public IPv4 (EIP) | $3.63 |
+| EBS (root + data, snapshot) | $2.17 |
+| S3 | $0.02 |
+| CloudFront · ECR · Lambda · CloudWatch · SNS · Backup | $0.00 |
+| **합계 (세전)** | **$21.79** |
+| 부가세 (10%) | $2.18 |
+| **청구액** | **$23.97** |
+
+NAT Gateway(월 $40+)와 ALB(월 $16+) 없이 CloudFront 경로 라우팅으로 구성해 고정비를 줄였습니다.
