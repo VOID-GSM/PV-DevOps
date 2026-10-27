@@ -122,9 +122,10 @@ module "budgets" {
 }
 
 module "ssm" {
-  source     = "./modules/ssm"
-  name       = local.name
-  ops_bucket = module.s3.ops_bucket.name
+  source         = "./modules/ssm"
+  name           = local.name
+  ops_bucket     = module.s3.ops_bucket.name
+  uploads_bucket = module.s3.uploads_bucket.name
 }
 
 moved {

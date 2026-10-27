@@ -26,6 +26,15 @@ resource "aws_ssm_document" "deploy" {
               REGISTRY=${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.region}.amazonaws.com
               REPO="$REGISTRY/${var.name}-backend"
               cd /data/backend
+              {
+                aws ssm get-parameters-by-path --path "/${var.name}/backend/" --with-decryption \
+                  --query 'Parameters[].[Name,Value]' --output text \
+                  | awk -F'\t' '{ n = $1; sub(".*/", "", n); print n "=" $2 }'
+                echo "STORAGE_BUCKET=${var.uploads_bucket}"
+                echo "PG_DATA_DIR=/data/postgres"
+              } > .env.new
+              grep -q '^DB_PASSWORD=' .env.new || { echo "missing /${var.name}/backend/DB_PASSWORD" >&2; exit 1; }
+              install -m 600 .env.new .env && rm -f .env.new
 
               aws s3 cp "s3://${var.ops_bucket}/deploy/backend/docker-compose.yml" docker-compose.yml --only-show-errors
               aws ecr get-login-password | docker login -u AWS --password-stdin "$REGISTRY" > /dev/null
