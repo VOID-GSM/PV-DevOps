@@ -97,7 +97,7 @@ resource "aws_iam_role_policy" "app" {
       },
       { # 과제 첨부파일
         Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:PutObjectTagging", "s3:GetObjectTagging", "s3:DeleteObjectTagging"]
         Resource = "arn:aws:s3:::${var.uploads_bucket}/*"
       },
       { # 앱 시크릿 

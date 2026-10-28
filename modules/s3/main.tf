@@ -37,9 +37,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "uploads" {
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
-    filter {}
+    filter {
+      tag {
+        key   = "status"
+        value = "temp"
+      }
+    }
+    expiration {
+      days = 1
+    }
     noncurrent_version_expiration {
-      noncurrent_days = 30
+      noncurrent_days = 1
     }
   }
 }
@@ -55,5 +63,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "ops" {
     expiration {
       days = var.backup_retention_days
     }
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "uploads" {
+  bucket = aws_s3_bucket.this["uploads"].id
+
+  cors_rule {
+    allowed_origins = var.cors_allowed_origins
+    allowed_methods = ["GET", "PUT", "HEAD"]
+    allowed_headers = ["content-type", "x-amz-tagging"] # x-amz-tagging: 임시 업로드 표시(status=temp)
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
   }
 }
