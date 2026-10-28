@@ -1,5 +1,5 @@
 # PV-DevOps
-동아리 팀 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문서입니다.
+VOID 동아리 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문서입니다.
 
 ## Architecture
 ![Architecture](architecture.svg)
@@ -28,13 +28,12 @@ providers.tf   # provider 버전, backend
 ```bash
 git switch -c feat/<작업>
 terraform fmt -recursive && terraform plan
-# PR 생성 → CI plan 댓글 확인 → Squash merge
+# PR 생성 → CI(lint · plan) 통과 · plan 댓글 확인 → Squash merge
 git switch main && git pull && terraform apply
 ```
 
-- `main`은 PR과 CI 통과가 필수입니다.
-- apply는 관리자 권한이 필요해서 CI가 아닌 로컬에서 실행합니다.
-- PR의 plan과 로컬 plan이 다르면 apply하지 않습니다.
+- `main`은 PR과 CI(lint, plan) 통과가 필수입니다.
+- lint: tflint(Terraform·AWS 규칙) + trivy(HIGH/CRITICAL 보안 설정 검사)
 
 ## Operations
 **서버 접속:** SSH는 사용하지 않습니다. AWS 콘솔 → EC2 → 연결 → Session Manager
@@ -67,7 +66,8 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter \
 - 배포 역할은 지정한 SSM 문서만 실행할 수 있고, PR plan 역할은 읽기 전용입니다.
 - EC2는 CloudFront IP 대역에서 오는 80번 포트만 허용하고, IMDSv2를 강제합니다.
 - 시크릿 값은 Terraform 코드와 state에 남기지 않습니다.
-- 서드파티 Actions는 커밋 SHA로 고정합니다.
+- PR마다 trivy로 보안 설정을 검사합니다. 비용·설계상 적용하지 않은 항목(WAF, SNS 암호화, VPC 엔드포인트 등)은 사유와 함께 예외로 기록합니다(`.trivyignore`, 리소스별 인라인 주석).
+- 보안 스캐너 Actions(trivy, tflint)는 공급망 공격 대응을 위해 커밋 SHA로 고정합니다.
 
 ## Monitoring
 
