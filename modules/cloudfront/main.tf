@@ -37,6 +37,8 @@ resource "aws_cloudfront_function" "spa" {
   JS
 }
 
+# WAF 미적용: Web ACL 월 $5+ (인프라 전체 비용의 약 25%). Shield Standard 기본 DDoS 보호로 대체
+#trivy:ignore:AWS-0011
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   comment             = var.name

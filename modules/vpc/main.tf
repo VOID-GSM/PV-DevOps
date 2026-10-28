@@ -51,6 +51,9 @@ data "aws_ec2_managed_prefix_list" "cloudfront" {
   name = "com.amazonaws.global.cloudfront.origin-facing"
 }
 
+# egress 전체 허용: ECR·S3·SSM·패키지 저장소의 IP가 고정되지 않음.
+# 제한하려면 VPC 엔드포인트(개당 월 $7+) 필요. ingress는 CloudFront prefix list만 허용
+#trivy:ignore:AWS-0104
 resource "aws_vpc_security_group_egress_rule" "all" {
   security_group_id = aws_security_group.web.id
   description       = "packages, ECR, SSM, S3"
