@@ -46,3 +46,30 @@ resource "aws_backup_selection" "tagged" {
     value = "daily"
   }
 }
+
+# 백업 실패 알림: AWS Backup 이벤트 중 실패만 골라 SNS로 보냄
+resource "aws_cloudwatch_event_rule" "backup_failed" {
+  name = "${var.name}-backup-failed"
+  event_pattern = jsonencode({
+    source        = ["aws.backup"]
+    "detail-type" = ["Backup Job State Change"]
+    detail        = { state = ["FAILED", "ABORTED", "EXPIRED"] }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "backup_failed" {
+  rule = aws_cloudwatch_event_rule.backup_failed.name
+  arn  = var.alarm_topic_arn
+
+  # Discord 알림 Lambda가 읽기 좋은 형태로 바꿔서 보냄
+  input_transformer {
+    input_paths = {
+      state    = "$.detail.state"
+      reason   = "$.detail.statusMessage"
+      resource = "$.detail.resourceArn"
+    }
+    input_template = <<-EOT
+      {"title": "❌ 백업 실패 (<state>)", "description": "<reason>", "resource": "<resource>"}
+    EOT
+  }
+}

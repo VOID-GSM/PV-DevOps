@@ -1,7 +1,8 @@
-# 알림 허브: 모든 알림(CloudWatch 알람, 예산, 백업 실패)이 이 토픽으로 모이고
-# 구독한 Lambda가 Discord로 전달
 data "aws_caller_identity" "current" {}
 
+# 암호화 미적용: 기본 키(aws/sns)로 암호화하면 Budgets·EventBridge가 발행할 수 없음.
+# CMK + 키 정책이 필요하나, 토픽 내용은 민감 정보가 없는 장애 알림
+#trivy:ignore:AWS-0095
 resource "aws_sns_topic" "this" {
   name = "${var.name}-alarms"
 }
