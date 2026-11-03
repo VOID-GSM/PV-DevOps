@@ -1,9 +1,10 @@
-# WAF 미적용: Web ACL 월 $5+ (인프라 전체 비용의 약 25%). Shield Standard 기본 DDoS 보호로 대체
-#trivy:ignore:AWS-0011
 data "aws_caller_identity" "current" {}
 data "aws_cloudfront_cache_policy" "optimized" { name = "Managed-CachingOptimized" }
 data "aws_cloudfront_cache_policy" "disabled" { name = "Managed-CachingDisabled" }
 data "aws_cloudfront_origin_request_policy" "all_viewer" { name = "Managed-AllViewer" }
+data "aws_cloudfront_response_headers_policy" "security" {
+  name = "Managed-SecurityHeadersPolicy"
+}
 
 resource "aws_s3_bucket" "web" {
   bucket = "${var.name}-web-${data.aws_caller_identity.current.account_id}"
@@ -64,12 +65,13 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   default_cache_behavior {
-    target_origin_id       = "web"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    cache_policy_id        = data.aws_cloudfront_cache_policy.optimized.id
-    compress               = true
+    target_origin_id           = "web"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.optimized.id
+    compress                   = true
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security.id
 
     function_association {
       event_type   = "viewer-request"
@@ -78,14 +80,15 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   ordered_cache_behavior {
-    path_pattern             = "/api/*"
-    target_origin_id         = "api"
-    viewer_protocol_policy   = "https-only"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
-    cached_methods           = ["GET", "HEAD"]
-    cache_policy_id          = data.aws_cloudfront_cache_policy.disabled.id
-    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer.id
-    compress                 = true
+    path_pattern               = "/api/*"
+    target_origin_id           = "api"
+    viewer_protocol_policy     = "https-only"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.disabled.id
+    origin_request_policy_id   = data.aws_cloudfront_origin_request_policy.all_viewer.id
+    compress                   = true
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security.id
   }
 
   restrictions {

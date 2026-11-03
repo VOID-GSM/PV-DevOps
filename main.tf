@@ -23,9 +23,9 @@ module "ecr" {
 }
 
 module "s3" {
-  source               = "./modules/s3"
-  name                 = local.name
-    cors_allowed_origins = [
+  source = "./modules/s3"
+  name   = local.name
+  cors_allowed_origins = [
     "https://${module.cloudfront.domain_name}",
     "http://localhost:5173", # 로컬 프론트 개발용 (실사용자 생길 시 제거 예정)
   ]
