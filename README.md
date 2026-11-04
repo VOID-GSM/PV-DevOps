@@ -1,4 +1,4 @@
-<img width="1576" height="147" alt="image" src="https://github.com/user-attachments/assets/31444118-1467-4d8b-8890-ab353b8443f0" /># PV-DevOps
+# PV-DevOps
 VOID 동아리 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문서입니다.
 
 ## Architecture
