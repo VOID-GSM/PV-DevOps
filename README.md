@@ -1,4 +1,4 @@
-# PV-DevOps
+<img width="1576" height="147" alt="image" src="https://github.com/user-attachments/assets/31444118-1467-4d8b-8890-ab353b8443f0" /># PV-DevOps
 VOID 동아리 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문서입니다.
 
 ## Architecture
@@ -67,8 +67,8 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter \
 - EC2는 CloudFront IP 대역에서 오는 80번 포트만 허용하고, IMDSv2를 강제합니다.
 - 시크릿 값은 Terraform 코드와 state에 남기지 않습니다.
 - PR마다 trivy로 보안 설정을 검사합니다. 비용·설계상 적용하지 않은 항목(WAF, SNS 암호화, VPC 엔드포인트 등)은 사유와 함께 예외로 기록합니다(`.trivyignore`, 리소스별 인라인 주석).
-- 보안 스캐너 Actions(trivy, tflint)는 공급망 공격 대응을 위해 커밋 SHA로 고정합니다.
-
+- tflint Action은 커밋 SHA로 고정하고, trivy는 릴리스 바이너리를 버전 고정 + SHA256 체크섬 검증 후 설치합니다.
+  
 ## Monitoring
 
 | 이벤트 | 대응 |
