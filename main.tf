@@ -62,6 +62,7 @@ module "cloudfront" {
   source            = "./modules/cloudfront"
   name              = local.name
   api_origin_domain = module.ec2.public_dns
+  uploads_bucket    = module.s3.uploads_bucket.name
 }
 
 module "backup" {
