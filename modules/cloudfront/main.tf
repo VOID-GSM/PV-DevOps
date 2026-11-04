@@ -1,9 +1,28 @@
+data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 data "aws_cloudfront_cache_policy" "optimized" { name = "Managed-CachingOptimized" }
 data "aws_cloudfront_cache_policy" "disabled" { name = "Managed-CachingDisabled" }
 data "aws_cloudfront_origin_request_policy" "all_viewer" { name = "Managed-AllViewer" }
 data "aws_cloudfront_response_headers_policy" "security" {
   name = "Managed-SecurityHeadersPolicy"
+}
+
+locals {
+  uploads_origin = "https://${var.uploads_bucket}.s3.${data.aws_region.current.region}.amazonaws.com"
+
+  # 웹(SPA)용 CSP. Report-Only로 위반만 관측하고 차단하지 않음
+  csp = join("; ", [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: ${local.uploads_origin}",
+    "connect-src 'self' ${local.uploads_origin}", # presigned URL로 S3 직접 업로드
+    "font-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'self'",
+  ])
 }
 
 resource "aws_s3_bucket" "web" {
@@ -71,7 +90,7 @@ resource "aws_cloudfront_distribution" "this" {
     cached_methods             = ["GET", "HEAD"]
     cache_policy_id            = data.aws_cloudfront_cache_policy.optimized.id
     compress                   = true
-    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.web.id
 
     function_association {
       event_type   = "viewer-request"
@@ -110,4 +129,35 @@ resource "aws_s3_bucket_policy" "web" {
       Condition = { StringEquals = { "AWS:SourceArn" = aws_cloudfront_distribution.this.arn } }
     }]
   })
+}
+
+resource "aws_cloudfront_response_headers_policy" "web" {
+  name = "${var.name}-web-security-headers"
+
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      include_subdomains         = false
+      override                   = true
+    }
+    frame_options {
+      frame_option = "SAMEORIGIN"
+      override     = true
+    }
+    content_type_options {
+      override = true
+    }
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+  }
+
+  custom_headers_config {
+    items {
+      header   = "Content-Security-Policy-Report-Only"
+      value    = local.csp
+      override = true
+    }
+  }
 }
