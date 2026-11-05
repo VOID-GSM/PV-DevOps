@@ -132,8 +132,3 @@ module "ssm" {
   ops_bucket     = module.s3.ops_bucket.name
   uploads_bucket = module.s3.uploads_bucket.name
 }
-
-moved {
-  from = module.iam.aws_ssm_document.deploy
-  to   = module.ssm.aws_ssm_document.deploy
-}
