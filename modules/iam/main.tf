@@ -33,7 +33,7 @@ resource "aws_iam_role_policy" "deploy" {
         Action   = ["ecr:BatchCheckLayerAvailability", "ecr:BatchGetImage", "ecr:InitiateLayerUpload", "ecr:UploadLayerPart", "ecr:CompleteLayerUpload", "ecr:PutImage"]
         Resource = var.ecr_repository_arns
       },
-      { # 배포 번들(compose, nginx 설정, 스크립트) 업로드
+      { # 배포용 docker-compose.yml 업로드
         Effect   = "Allow"
         Action   = ["s3:ListBucket", "s3:PutObject", "s3:DeleteObject"]
         Resource = ["arn:aws:s3:::${var.ops_bucket}", "arn:aws:s3:::${var.ops_bucket}/deploy/*"]
