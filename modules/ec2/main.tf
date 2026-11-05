@@ -20,12 +20,7 @@ resource "aws_instance" "this" {
   iam_instance_profile   = aws_iam_instance_profile.this.name
 
   user_data = templatefile("${path.module}/user_data.sh.tftpl", {
-    data_volume    = replace(aws_ebs_volume.data.id, "-", "")
-    region         = data.aws_region.current.region
-    registry       = var.registry_url
-    ops_bucket     = var.ops_bucket
-    uploads_bucket = var.uploads_bucket
-    ssm_path       = var.ssm_path
+    data_volume = replace(aws_ebs_volume.data.id, "-", "")
   })
 
   credit_specification {
