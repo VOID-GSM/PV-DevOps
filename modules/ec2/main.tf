@@ -90,10 +90,10 @@ resource "aws_iam_role_policy" "app" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      { # 배포 번들 받기, DB 백업 올리기 (삭제 권한은 주지 않음)
+      { # 배포용 docker-compose.yml 받기 (읽기 전용)
         Effect   = "Allow"
-        Action   = ["s3:ListBucket", "s3:GetObject", "s3:PutObject"]
-        Resource = ["arn:aws:s3:::${var.ops_bucket}", "arn:aws:s3:::${var.ops_bucket}/*"]
+        Action   = "s3:GetObject"
+        Resource = "arn:aws:s3:::${var.ops_bucket}/deploy/*"
       },
       { # 과제 첨부파일
         Effect   = "Allow"
