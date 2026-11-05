@@ -37,7 +37,6 @@ module "ec2" {
   instance_type     = local.instance_type
   subnet_id         = module.vpc.public_subnet_id
   security_group_id = module.vpc.web_security_group_id
-  registry_url      = module.ecr.registry_url
   ops_bucket        = module.s3.ops_bucket.name
   uploads_bucket    = module.s3.uploads_bucket.name
   ssm_path          = "/${local.project}/"
