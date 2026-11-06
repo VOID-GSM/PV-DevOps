@@ -1,0 +1,67 @@
+name: Terraform Drift
+
+on:
+  schedule:
+    - cron: "7 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: terraform-drift
+  cancel-in-progress: true
+
+env:
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v4
+        with: 
+          terraform_version: ${{ vars.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials 
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.TF_PLAN_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: Plan 
+        id: plan
+        run: |
+          terraform init -input=false
+          set +e
+          terraform plan -input=false -no-color -lock=false -detailed-exitcode > plan.log 2>&1
+          code=$?
+          set -e
+          cat plan.log
+          echo "exitcode=$code" >> "$GITHUB_OUTPUT"
+          [ "$code" -ne 1 ]
+
+      - name: Notify Discord
+        if: always() && (steps.plan.outputs.exitcode == '2' || failure())
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_DEVOPS_WEBHOOK }}
+          CODE: ${{ steps.plan.outputs.exitcode }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$CODE" = "2" ]; then
+            title="⚠️ 인프라 Drift 감지"
+            summary=$(grep -E '^Plan:' plan.log || true)
+            resources=$(grep -E '^  # ' plan.log | sed 's/^  # //' | head -15 || true)
+            desc=$(printf '코드와 실제 AWS 상태가 다릅니다.\n%s\n\n%s' "$summary" "$resources")
+          else
+            title="❌ Drift 검사 실패"
+            desc="plan 실행에 실패했습니다. Actions 로그를 확인하세요."
+          fi
+          jq -n --arg t "$title" --arg d "$desc" --arg u "$RUN_URL" \
+            '{embeds: [{title: $t, description: ($d + "\n\n" + $u), color: 15105570}]}' \
+            | curl -fsS -H "Content-Type: application/json" -d @- "$WEBHOOK"
