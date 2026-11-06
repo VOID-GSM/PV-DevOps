@@ -10,7 +10,10 @@ resource "aws_iam_role" "terraform_plan" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:${var.infra_repo}:pull_request"
+          "token.actions.githubusercontent.com:sub" = [
+            "repo:${var.infra_repo}:pull_request",
+            "repo:${var.infra_repo}:ref:refs/heads/main",
+          ]
         }
       }
     }]
