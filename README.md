@@ -4,7 +4,7 @@ VOID 동아리 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문
 ## Architecture
 ![Architecture](architecture.svg)
 
-주요 설계 결정과 이유는 [ADR](docs/adr/README.md)에 정리했습니다.
+주요 설계 결정과 이유는 [ADR](docs/README.md)에 정리했습니다.
 
 | 구분 | 사용 기술 |
 | --- | --- |
