@@ -10,4 +10,4 @@
 | [004](004-secrets-outside-terraform.md) | 시크릿 값은 Terraform 밖에서 관리 | Accepted |
 | [005](005-ecr-image-deploy.md) | 서버 빌드 대신 ECR 이미지 배포 + 자동 롤백 | Accepted |
 
-새 ADR은 [TEMPLATE.md](TEMPLATE.md)를 복사해 다음 번호로 작성합니다.
+새 ADR은 [ADR_TEMPLATE.md](ADR_TEMPLATE.md)를 복사해 다음 번호로 작성합니다.
