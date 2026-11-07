@@ -4,6 +4,8 @@ VOID 동아리 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문
 ## Architecture
 ![Architecture](architecture.svg)
 
+주요 설계 결정과 이유는 [ADR](docs/adr/README.md)에 정리했습니다.
+
 | 구분 | 사용 기술 |
 | --- | --- |
 | IaC | Terraform (S3 backend, native lock) |
@@ -17,6 +19,7 @@ VOID 동아리 운영 서비스 **PV**의 AWS 인프라(Terraform)와 운영 문
 
 ```
 bootstrap/     # Terraform state 버킷 (최초 1회)
+docs/          # 설계 결정 기록 (ADR) + README
 modules/       # AWS 서비스 단위 모듈
 functions/     # Lambda 소스 (헬스체크, Discord 알림)
 main.tf        # 모듈 연결
