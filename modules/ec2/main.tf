@@ -100,6 +100,16 @@ resource "aws_iam_role_policy" "app" {
         Action   = "ssm:GetParametersByPath"
         Resource = "arn:aws:ssm:${data.aws_region.current.region}:*:parameter${trimsuffix(var.ssm_path, "/")}*"
       },
+      {
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = "${aws_cloudwatch_log_group.backend.arn}:*"
+      },
     ]
   })
+}
+
+resource "aws_cloudwatch_log_group" "backend" {
+  name              = "/${var.name}/backend"
+  retention_in_days = 14
 }
