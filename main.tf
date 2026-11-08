@@ -130,4 +130,5 @@ module "ssm" {
   name           = local.name
   ops_bucket     = module.s3.ops_bucket.name
   uploads_bucket = module.s3.uploads_bucket.name
+  log_group      = module.ec2.log_group_name
 }

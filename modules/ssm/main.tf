@@ -37,6 +37,21 @@ resource "aws_ssm_document" "deploy" {
               install -m 600 .env.new .env && rm -f .env.new
 
               aws s3 cp "s3://${var.ops_bucket}/deploy/backend/docker-compose.yml" docker-compose.yml --only-show-errors
+
+              # 백엔드 로그를 CloudWatch Logs로 전송 (로컬 개발용 compose는 그대로 두고 서버에서만 덮어씀)
+              cat > docker-compose.override.yml <<'OVR'
+              services:
+                backend:
+                  logging: !override
+                    driver: awslogs
+                    options:
+                      awslogs-region: ${data.aws_region.current.region}
+                      awslogs-group: ${var.log_group}
+                      awslogs-stream: backend
+                      mode: non-blocking
+                      max-buffer-size: 4m
+              OVR
+
               aws ecr get-login-password | docker login -u AWS --password-stdin "$REGISTRY" > /dev/null
               prev="$(cat .backend_tag 2>/dev/null || true)"
 
