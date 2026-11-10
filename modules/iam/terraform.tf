@@ -48,10 +48,11 @@ resource "aws_iam_role_policy" "terraform_plan" {
         Action   = "ssm:GetParameter*"
         Resource = "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:parameter/*"
       },
-      { # 업로드 버킷의 사용자 파일 읽기 차단 (ReadOnlyAccess에 s3:GetObject 포함, plan에는 불필요)
-        Effect   = "Deny"
-        Action   = ["s3:GetObject", "s3:GetObjectVersion"]
-        Resource = "arn:aws:s3:::${var.uploads_bucket}/*"
+      { # state 버킷 외 모든 S3 객체 읽기 차단
+        # ReadOnlyAccess의 s3:Get*에 GetObject가 포함됨. plan은 state만 읽으면 되므로 나머지는 전부 막음
+        Effect      = "Deny"
+        Action      = ["s3:GetObject", "s3:GetObjectVersion"]
+        NotResource = "arn:aws:s3:::${var.state_bucket}/*"
       },
       {
         Effect   = "Deny"
