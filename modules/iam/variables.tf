@@ -20,8 +20,3 @@ variable "deploy_document_arn" {
   description = "배포 역할이 실행할 수 있는 SSM 문서 ARN"
   type        = string
 }
-
-variable "uploads_bucket" {
-  description = "plan 역할이 객체를 읽지 못하게 막을 업로드 버킷 이름"
-  type        = string
-}

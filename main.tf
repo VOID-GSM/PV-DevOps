@@ -55,7 +55,6 @@ module "iam" {
   infra_repo           = "VOID-GSM@253180703/PV-DevOps@1409495652"
   state_bucket         = "pv-tfstate-959589243103"
   deploy_document_arn  = module.ssm.deploy_document_arn
-  uploads_bucket       = module.s3.uploads_bucket.name
 }
 
 module "cloudfront" {
