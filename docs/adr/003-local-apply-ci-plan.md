@@ -6,7 +6,9 @@ Date : 2026-10
 apply에는 사실상 관리자 권한이 필요한데 CI에서 apply하려면 관리자 권한 역할을 GitHub Actions에 줘야 하고 머지 전 승인 절차가 필요하다. 
 
 ## Decision
-PR마다 CI에서 `fmt` / `validate` / `tflint` / `trivy` / `plan` 을 실행하고 plan 결과를 PR 댓글로 남긴다. CI의 plan 역할은 읽기 전용이며 계정의 SSM이랑 Secrets Manager 값 조회를 차단한다. apply는 머지 후 main 브랜치에서 로컬로 실행한다. 매일 drift 감지 워크플로로 코드와 실제 상태의 차이를 확인한다.
+PR마다 CI에서 `fmt` / `validate` / `tflint` / `trivy` / `plan` 을 실행하고 plan 결과를 PR 댓글로 남긴다. CI의 plan 역할은 읽기 전용이며 계정의 SSM 파라미터 값(이력 포함)과 Secrets Manager 값, state 버킷 외의 S3 객체 조회를 차단한다. apply는 머지 후 main 브랜치에서 로컬로 실행한다. 매일 drift 감지 워크플로로 코드와 실제 상태의 차이를 확인한다.
+
+**변경 이력** : 2026-11 plan 역할의 SSM 이력 조회 누락 발견, 차단 범위 확대 (#13)
 
 ## Alternatives
 대안 | 버린 이유
