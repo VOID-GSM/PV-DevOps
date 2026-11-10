@@ -41,10 +41,17 @@ resource "aws_iam_role_policy" "terraform_plan" {
         Action   = ["s3:PutObject", "s3:DeleteObject"]
         Resource = "arn:aws:s3:::${var.state_bucket}/*.tflock"
       },
-      { # 우리 계정 파라미터만 차단 (계정 ID 없는 AWS 공개 파라미터는 허용 → AMI 조회 가능)
+      { # 우리 계정 파라미터 값 조회 차단 (계정 ID 없는 AWS 공개 파라미터는 허용 → AMI 조회 가능)
+        # GetParameter* = GetParameter, GetParameters, GetParametersByPath, GetParameterHistory
+        # GetParameterHistory도 --with-decryption으로 SecureString 평문을 돌려주므로 함께 막아야 함
         Effect   = "Deny"
-        Action   = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"]
+        Action   = "ssm:GetParameter*"
         Resource = "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:parameter/*"
+      },
+      { # 업로드 버킷의 사용자 파일 읽기 차단 (ReadOnlyAccess에 s3:GetObject 포함, plan에는 불필요)
+        Effect   = "Deny"
+        Action   = ["s3:GetObject", "s3:GetObjectVersion"]
+        Resource = "arn:aws:s3:::${var.uploads_bucket}/*"
       },
       {
         Effect   = "Deny"
