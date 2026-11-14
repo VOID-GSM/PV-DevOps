@@ -25,6 +25,11 @@ locals {
   ])
 }
 
+resource "random_password" "origin_verify" {
+  length  = 48
+  special = false
+}
+
 resource "aws_s3_bucket" "web" {
   bucket = "${var.name}-web-${data.aws_caller_identity.current.account_id}"
 }
@@ -74,6 +79,11 @@ resource "aws_cloudfront_distribution" "this" {
   origin {
     origin_id   = "api"
     domain_name = var.api_origin_domain
+
+    custom_header {
+      name  = "X-Origin-Verify"
+      value = random_password.origin_verify.result
+    }
 
     custom_origin_config {
       http_port              = 80

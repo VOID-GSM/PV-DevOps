@@ -9,5 +9,6 @@
  [003](adr/003-local-apply-ci-plan.md) | CI는 plan만, apply는 로컬에서 | Accepted 
  [004](adr/004-secrets-outside-terraform.md) | 시크릿 값은 Terraform 밖에서 관리 | Accepted 
  [005](adr/005-ecr-image-deploy.md) | 서버 빌드 대신 ECR 이미지 배포 + 자동 롤백 | Accepted 
+ [006](adr/006-origin-verify-header.md) | CloudFront → EC2 요청을 비밀 헤더로 검증 | Accepted
 
 새 ADR은 [ADR_TEMPLATE.md](adr/ADR_TEMPLATE.md)를 복사해 다음 번호로 작성합니다.

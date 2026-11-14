@@ -53,3 +53,8 @@ output "terraform_plan_role_arn" {
 output "deploy_document_name" {
   value = module.ssm.deploy_document_name
 }
+
+output "origin_verify_secret" {
+  value     = module.cloudfront.origin_verify_secret
+  sensitive = true
+}
