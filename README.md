@@ -67,7 +67,7 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter \
 
 - GitHub Actions는 OIDC로 인증하며, 장기 Access Key를 쓰지 않습니다.
 - 배포 역할은 지정한 SSM 문서만 실행할 수 있고, PR plan 역할은 읽기 전용입니다.
-- EC2는 CloudFront IP 대역에서 오는 80번 포트만 허용하고, IMDSv2를 강제합니다.
+- EC2는 CloudFront IP 대역에서 오는 80번 포트만 허용하고, 우리 배포가 붙이는 비밀 헤더(`X-Origin-Verify`)가 없으면 백엔드가 403을 반환합니다. IMDSv2를 강제합니다.
 - 시크릿 값은 Terraform 코드와 state에 남기지 않습니다.
 - PR마다 trivy로 보안 설정을 검사합니다. 비용·설계상 적용하지 않은 항목(WAF, SNS 암호화, VPC 엔드포인트 등)은 사유와 함께 예외로 기록합니다(`.trivyignore`, 리소스별 인라인 주석).
 - tflint Action은 커밋 SHA로 고정하고, trivy는 릴리스 바이너리를 버전 고정 + SHA256 체크섬 검증 후 설치합니다.
