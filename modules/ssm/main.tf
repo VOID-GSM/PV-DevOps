@@ -34,6 +34,7 @@ resource "aws_ssm_document" "deploy" {
                 echo "PG_DATA_DIR=/data/postgres"
               } > .env.new
               grep -q '^DB_PASSWORD=' .env.new || { echo "missing /${var.name}/backend/DB_PASSWORD" >&2; exit 1; }
+              grep -q '^ORIGIN_VERIFY_SECRET=.' .env.new || { echo "missing /${var.name}/backend/ORIGIN_VERIFY_SECRET" >&2; exit 1; }
               install -m 600 .env.new .env && rm -f .env.new
 
               aws s3 cp "s3://${var.ops_bucket}/deploy/backend/docker-compose.yml" docker-compose.yml --only-show-errors
