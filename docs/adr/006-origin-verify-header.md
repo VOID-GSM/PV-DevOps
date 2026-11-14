@@ -29,7 +29,7 @@ WAF로 헤더 검사 | Web ACL 월 $5+, 결국 같은 헤더 방식
 **감수한 것** :
 - **값이 state와 CloudFront 설정에 남음** : CloudFront 설정(`GetDistributionConfig`)에 들어가는 이상 계정 읽기 권한이 있으면 볼 수 있는 값이라 state에 남는다고 노출 범위가 넓어지지 않는다고 판단. DB 비밀번호 같은 시크릿과는 등급이 다르다.
 - **CloudFront → EC2 구간이 HTTP** : 헤더가 평문으로 전송된다(ADR 002). 이 헤더는 남의 CloudFront를 통한 우회를 막는 장치이지, 구간 도청까지 막지는 못한다. 완전한 해결은 origin TLS.
-- **값 교체 시 짧은 불일치** : `terraform apply -replace=module.cloudfront.random_password.origin_verify` 후 SSM 갱신·백엔드 배포 사이에 API가 403을 반환한다. 백엔드가 두 값을 함께 허용하게 하면 무중단 교체 가능(필요해지면 도입).
-- **SSM 값이 없으면 검사가 꺼짐** : 백엔드가 시작할 때 경고 로그를 남긴다.
+- **값 교체 시 짧은 불일치** : `terraform apply -replace=module.cloudfront.random_password.origin_verify` 후 SSM 갱신·백엔드 배포 사이에 API가 403을 반환한다. CloudFront 설정이 전 엣지에 퍼지는 데 수 분이 걸려 그동안 옛 값과 새 값이 섞여 오므로 순서를 맞춰도 이 구간은 없앨 수 없다. 무중단 교체가 필요해지면 백엔드가 두 값을 함께 허용하도록 바꾼다.
+- **SSM 값이 없으면 배포 실패** : 운영에서 검사가 조용히 꺼지는 것을 막기 위해 배포 문서가 `.env` 생성 단계에서 값이 없으면 중단한다. 로컬 개발(값 없음)에서는 백엔드가 검사를 건너뛴다.
 
 **다시 검토할 시점** : 커스텀 도메인 + origin TLS를 도입할 때 또는 private subnet으로 옮길 때
