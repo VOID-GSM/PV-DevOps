@@ -66,7 +66,7 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter \
 **오리진 검증 헤더 값 등록:** 최초 apply 후, 또는 값을 교체한 후 한 번 실행합니다. 이 값이 없으면 배포가 실패합니다([ADR 006](docs/adr/006-origin-verify-header.md)).
 
 ```bash
-+MSYS_NO_PATHCONV=1 aws ssm put-parameter --name /pv/backend/ORIGIN_VERIFY_SECRET \
+MSYS_NO_PATHCONV=1 aws ssm put-parameter --name /pv/backend/ORIGIN_VERIFY_SECRET \
   --type SecureString --value "$(terraform output -raw origin_verify_secret)" --overwrite
 ```
 
