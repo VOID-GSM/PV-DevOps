@@ -114,7 +114,7 @@ module "cloudwatch" {
   health_check_function_arn  = module.health_check.function_arn
   health_check_function_name = module.health_check.function_name
   health_check_targets = {
-    api = "https://${module.cloudfront.domain_name}/api/swagger-ui/index.html"
+    api = "https://${module.cloudfront.domain_name}/api/actuator/health"
     web = "https://${module.cloudfront.domain_name}/"
   }
 }
