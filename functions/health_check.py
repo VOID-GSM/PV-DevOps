@@ -1,21 +1,19 @@
 # 5분마다 URL을 호출해 성공 여부를 CloudWatch 지표(Success = 1 또는 0)로 기록
 # 장애/복구 판단은 CloudWatch 알람이 함 (연속 실패 → 장애 알림, 회복 → 복구 알림)
-import urllib.error
 import urllib.request
 import boto3
 
 _cw = boto3.client("cloudwatch")
 
 def _is_up(url):
-    # 응답이 왔고 5xx가 아니면 정상 = 서버가 살아서 응답했다는 뜻 (401·404도 정상으로 봄)
-    # CloudFront 뒤의 서버가 죽으면 502/504, 응답이 없으면 타임아웃 → 실패
+    # 2xx만 정상. 사용자 입장에서 아래는 모두 장애다
+    # 503: Actuator DOWN(DB 연결 실패 등) / 502·504: 서버 다운
+    # 403: 오리진 검증 헤더 불일치(CloudFront와 서버의 값이 어긋남) / 404: 헬스체크 경로 없음
     req = urllib.request.Request(url, headers={"User-Agent": "pv-health-check"})
     try:
         with urllib.request.urlopen(req, timeout=10) as res:
-            return res.status < 500
-    except urllib.error.HTTPError as e:
-        return e.code < 500
-    except Exception:  # 타임아웃, DNS 실패, 연결 거부
+            return 200 <= res.status < 300
+    except Exception:  # HTTPError(4xx·5xx), 타임아웃, DNS 실패, 연결 거부
         return False
 
 def handler(event, context):

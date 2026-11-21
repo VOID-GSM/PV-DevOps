@@ -71,7 +71,7 @@ resource "aws_cloudwatch_metric_alarm" "health" {
   for_each = var.health_check_targets
 
   alarm_name          = "${var.name}-health-${each.key}"
-  alarm_description   = lookup({ api = "API 서버 접속", web = "웹 페이지 접속" }, each.key, "${each.key} 접속")
+  alarm_description   = lookup({ api = "API 서버·DB 상태", web = "웹 페이지 접속" }, each.key, "${each.key} 접속")
   namespace           = var.health_check_namespace
   metric_name         = "Success"
   dimensions          = { Target = each.key }
