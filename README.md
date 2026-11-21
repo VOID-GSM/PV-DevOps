@@ -84,7 +84,7 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter --name /pv/backend/ORIGIN_VERIFY_SECRET
 | 이벤트 | 대응 |
 | --- | --- |
 | EC2 상태 검사 실패 | 자동 복구 / 재부팅 + 알림 |
-| 웹·API 헬스체크 2회 연속 실패 | 알림 |
+| 웹 접속 · API 헬스체크(DB 연결 포함) 2회 연속 실패 | 알림 |
 | CPU 과부하 · 크레딧 부족 | 알림 |
 | 백업 실패 | 알림 |
 | 월 예산 80%(실제) · 100%(예상) | 알림 |
