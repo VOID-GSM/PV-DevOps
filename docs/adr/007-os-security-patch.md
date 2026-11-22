@@ -12,7 +12,7 @@ SSM 문서 `pv-os-patch`를 State Manager association으로 **매주 일요일 0
 - 매일 04:00 KST AWS Backup 이후로 잡는다. 백업 시작 허용 시간을 60분(`start_window`)으로 제한해서 05:00 전에 시작하지 못한 백업은 취소되고 백업 실패 알림이 온다. 즉 알림이 없으면 패치 직전 스냅샷이 있다.
 - 재부팅 시 docker가 `/data` 마운트 이후에 시작되도록 systemd drop-in(`RequiresMountsFor=/data`)을 둔다. 마운트가 실패하면 docker가 뜨지 않아 빈 DB로 서비스되는 일이 없다.
 - 실행 중인 명령이 끊기지 않도록 SSM Agent는 업그레이드 대상에서 제외한다.
-- 실패(Failed·TimedOut·Canceled)하면 EventBridge → SNS → Discord로 알린다.
+- 패치 또는 SSM Agent 업데이트가 실패(Failed·TimedOut·Canceled/Cancelled)하면 EventBridge → SNS → Discord로 알린다.
 
 ## Alternatives
 대안 | 버린 이유
