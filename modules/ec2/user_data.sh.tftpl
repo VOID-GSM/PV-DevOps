@@ -15,7 +15,10 @@ mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap defaults 0 0' 
 
 # Docker + Compose 플러그인 (AL2023 저장소에 compose 플러그인이 없어서 직접 설치)
 # 버전 바꿀 때는 https://github.com/docker/compose/releases 에 실제로 있는지 확인
-dnf install -y docker && systemctl enable --now docker
+mkdir -p /etc/systemd/system/docker.service.d
+printf '[Unit]\nRequiresMountsFor=/data\n' > /etc/systemd/system/docker.service.d/10-data-mount.conf
+dnf install -y docker && systemctl daemon-reload && systemctl enable --now docker
+
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -fsSL --retry 5 --retry-all-errors -o /usr/local/lib/docker/cli-plugins/docker-compose \
   "https://github.com/docker/compose/releases/download/v5.6.1/docker-compose-linux-$(uname -m)"
