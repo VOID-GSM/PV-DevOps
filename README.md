@@ -70,6 +70,12 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter --name /pv/backend/ORIGIN_VERIFY_SECRET
   --type SecureString --value "$(terraform output -raw origin_verify_secret)" --overwrite
 ```
 
+**OS 보안 패치:** 매주 일요일 05:00 KST에 보안 업데이트만 자동 설치하고, 필요할 때만 재부팅합니다([ADR 007](docs/adr/007-os-security-patch.md)). 즉시 실행하려면:
+
+```bash
+MSYS_NO_PATHCONV=1 aws ssm send-command --document-name pv-os-patch --instance-ids <INSTANCE_ID>
+```
+
 ## Security
 
 - GitHub Actions는 OIDC로 인증하며, 장기 Access Key를 쓰지 않습니다.
@@ -87,6 +93,7 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter --name /pv/backend/ORIGIN_VERIFY_SECRET
 | 웹 접속 · API 헬스체크(DB 연결 포함) 2회 연속 실패 | 알림 |
 | CPU 과부하 · 크레딧 부족 | 알림 |
 | 백업 실패 | 알림 |
+| OS 보안 패치 실패 | 알림 |
 | 월 예산 80%(실제) · 100%(예상) | 알림 |
 
 모든 알림은 Discord로 전송됩니다.
