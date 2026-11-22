@@ -67,7 +67,7 @@ resource "aws_cloudwatch_event_rule" "os_patch_failed" {
     ]
     detail = {
       "document-name" = [aws_ssm_document.os_patch.name]
-      status          = ["Failed", "TimedOut", "Canceled"]
+      status          = ["Failed", "TimedOut", "Canceled", "Cancelled"]
     }
   })
 }
