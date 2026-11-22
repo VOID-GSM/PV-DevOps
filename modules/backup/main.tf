@@ -8,6 +8,8 @@ resource "aws_backup_plan" "this" {
     rule_name         = "daily"
     target_vault_name = aws_backup_vault.this.name
     schedule          = var.schedule
+    start_window = 60 # 04:00~05:00 안에 시작 못 하면 취소(→ 백업 실패 알림). 05:00 OS 패치 전 스냅샷 보장 (ADR 007)
+    completion_window = 180
     lifecycle {
       delete_after = var.retention_days
     }
