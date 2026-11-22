@@ -79,7 +79,7 @@ resource "aws_cloudwatch_event_rule" "os_patch_failed" {
       "EC2 State Manager Instance Association State Change",
     ]
     detail = {
-      "document-name" = [aws_ssm_document.os_patch.name]
+      "document-name" = [aws_ssm_document.os_patch.name, "AWS-UpdateSSMAgent"]
       status          = ["Failed", "TimedOut", "Canceled", "Cancelled"]
     }
   })
@@ -95,7 +95,7 @@ resource "aws_cloudwatch_event_target" "os_patch_failed" {
       instance = "$.detail.instance-id"
     }
     input_template = <<-EOT
-      {"title": "❌ OS 보안 패치 실패 (<status>)", "description": "Systems Manager → Run Command / State Manager에서 출력을 확인하세요", "instance": "<instance>"}
+      {"title": "❌ 서버 유지보수 작업 실패 (<status>)", "description": "<document> 실행이 실패했습니다. Systems Manager → Run Command / State Manager에서 출력을 확인하세요", "instance": "<instance>"}
     EOT
   }
 }
