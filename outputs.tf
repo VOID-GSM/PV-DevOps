@@ -58,3 +58,7 @@ output "origin_verify_secret" {
   value     = module.cloudfront.origin_verify_secret
   sensitive = true
 }
+
+output "patch_document_name" {
+  value = module.ssm.patch_document_name
+}
