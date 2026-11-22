@@ -75,6 +75,7 @@ MSYS_NO_PATHCONV=1 aws ssm put-parameter --name /pv/backend/ORIGIN_VERIFY_SECRET
 ```bash
 MSYS_NO_PATHCONV=1 aws ssm send-command --document-name pv-os-patch --instance-ids <INSTANCE_ID>
 ```
+> ⚠️ 재부팅이 필요한 업데이트가 있으면 1분 뒤 서버가 재부팅됩니다(1~3분 중단). 정기 실행과 달리 백업 직후가 아니므로 필요하면 AWS Backup 콘솔에서 온디맨드 백업을 먼저 실행하세요.
 
 ## Security
 
