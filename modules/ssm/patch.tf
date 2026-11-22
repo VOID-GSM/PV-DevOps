@@ -55,6 +55,19 @@ resource "aws_ssm_association" "os_patch" {
   }
 }
 
+# SSM Agent는 OS 패치에서 제외했으므로 별도로 갱신 (OS 패치 30분 뒤, 일요일 05:30 KST)
+resource "aws_ssm_association" "agent_update" {
+  name                        = "AWS-UpdateSSMAgent"
+  association_name            = "${var.name}-ssm-agent-update-weekly"
+  schedule_expression         = "cron(30 20 ? * SAT *)"
+  apply_only_at_cron_interval = true
+
+  targets {
+    key    = "InstanceIds"
+    values = [var.instance_id]
+  }
+}
+
 # 패치 실패 알림 (백업 실패 알림과 같은 방식: EventBridge → SNS → Discord)
 # State Manager 실행 결과가 어느 이벤트로 오는지 문서상 명확하지 않아 두 이벤트를 모두 받는다
 resource "aws_cloudwatch_event_rule" "os_patch_failed" {
