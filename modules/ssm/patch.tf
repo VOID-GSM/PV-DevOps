@@ -93,6 +93,7 @@ resource "aws_cloudwatch_event_target" "os_patch_failed" {
     input_paths = {
       status   = "$.detail.status"
       instance = "$.detail.instance-id"
+      document = "$.detail.document-name"
     }
     input_template = <<-EOT
       {"title": "❌ 서버 유지보수 작업 실패 (<status>)", "description": "<document> 실행이 실패했습니다. Systems Manager → Run Command / State Manager에서 출력을 확인하세요", "instance": "<instance>"}
